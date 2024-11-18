@@ -1,10 +1,10 @@
 # The Real DevOps Challenge
 
-This challenge was designed to look for your DevOps skills with some tasks that we could find in our day in day. You have to fork this repository to complete the following challenges in your own Github account. Feel free to solve the challenge you want.
+This challenge was designed to look for your DevOps skills with some tasks that we could find in our day to day. You have to fork this repository to complete the following challenges in your own Github account. Feel free to solve the challenge you want.
 
-Once completed, upload all files to reproduce the challenges and if you think is necessary create `SOLUTION.md` file to add some explanation in each challenge directory.
+Once completed, upload all files to reproduce the challenges and if you think it's necessary then create `SOLUTION.md` file to add some explanation in each challenge directory.
 
-In each challenge you can reach some tasks, some are mandatory and others optionals. If you want to do it and prove your knowledge, go for the optional ones! ;). If you have any doubt, don't hesitate to open an issue to ask any question about any challenge.
+In each challenge you can reach some tasks, some are mandatory and others are optional. If you want to do it and prove your knowledge, go for the optional ones! ;). If you have any doubt, don't hesitate to open an issue to ask any question about any challenge.
 
 ## Pre-requisites
 
