@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-web
+  labels:
+    service: {{ .Release.Name }}-web
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  rules:
+  - host: {{ .Values.web.address }}
+    http:
+      paths:
+      # any path from root onwards, goes to same service
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            # point to the service by name
+            name: {{ .Release.Name }}-web
+            port: 
+              # port of the service
+              number: 80
