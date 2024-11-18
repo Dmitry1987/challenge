@@ -1,4 +1,8 @@
-# let's say we build things so using multistage 
+ARG runtime_image="gcr.io/distroless/python3-debian12"
+# use 'debug' tag for container with shell
+ARG image_tag="nonroot"
+
+# let's say we build things, so using multistage 
 FROM python:3.12-slim AS builder
 WORKDIR /app
 COPY main.py . 
@@ -6,7 +10,7 @@ COPY main.py .
 COPY file-from-ci .
 
 # Using distroless base image for least vulnerabilities
-FROM gcr.io/distroless/python3-debian12 AS runtime
+FROM ${runtime_image}${image_tag} AS runtime
 WORKDIR /app
 COPY --from=builder /app/main.py .
 COPY --from=builder /app/file-from-ci .

@@ -10,7 +10,14 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-  
+  # need this for manual run to make a ':debug' type of distroless container, in case will need to redeploy and debug in shell
+  workflow_dispatch:
+    inputs:
+      image-type:
+        description: Chose debug, for making debug type image
+        default: 'nonroot'
+        required: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,7 +46,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha,format=long
+            type=sha,format=short
           labels: | 
             org.opencontainers.image.title=${GITHUB_REPOSITORY}
             org.opencontainers.image.description='A webserver'
@@ -55,12 +62,13 @@ jobs:
         run: |
           echo '{ "version": "${GITHUB_SHA}" }' > challenge-1/file-from-ci
 
-      - name: Build and push Docker image
+      - name: Build and push image to dockerhub
         id: push
         uses: docker/build-push-action@v6.9.0
         with:
           context: challenge-1
           file: ./challenge-1/Dockerfile
           push: true
+          build-args: ${{ inputs.image-type }}
           tags: ${{ steps.build-metadata.outputs.tags }}
           labels: ${{ steps.build-metadata.outputs.labels }}
