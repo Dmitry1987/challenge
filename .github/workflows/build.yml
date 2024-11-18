@@ -63,12 +63,45 @@ jobs:
           echo '{ "version": "${GITHUB_SHA}" }' > challenge-1/file-from-ci
 
       - name: Build and push image to dockerhub
-        id: push
+        id: push-image
         uses: docker/build-push-action@v6.9.0
         with:
           context: challenge-1
           file: ./challenge-1/Dockerfile
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           build-args: ${{ inputs.image-type }}
           tags: ${{ steps.build-metadata.outputs.tags }}
+          labels: ${{ steps.build-metadata.outputs.labels }}
+
+      - name: Test with dive
+        id: dive-test
+        run: |
+          # It would be better to run dive binary from our custom ec2 runner, and record the exit code,
+          # because this can also fail for other docker reasons and exit code will be as if the test suite failed, 
+          # but for sake of challenge, the short way :)
+
+          docker run --name ${GITHUB_SHA} --rm \
+          -v $(pwd)/.dive-ci:/config.yaml \
+          wagoodman/dive:latest --config /config.yaml \
+          xperimnt/webserver@${{ steps.push-image.outputs.digest }}
+
+          if [ $? -eq 0 ]; then
+            echo "dive_status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "dive_status=failed" >> $GITHUB_OUTPUT
+          fi
+
+
+      # now, I know it's useless in terms of the dive test specifically, but let's say it was another testing suite that failed,
+      # so we conditionally do something else afterwards
+      - name: If dive has failed, build a debug image
+        if: ${{ steps.dive-test.outputs.dive_status == 'failed' }}
+        uses: docker/build-push-action@v6.9.0
+        with:
+          context: challenge-1
+          file: ./challenge-1/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          # hardcoding the debug here
+          build-args: debug
+          tags: debug-${{github.sha}}
           labels: ${{ steps.build-metadata.outputs.labels }}
