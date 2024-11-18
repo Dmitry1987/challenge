@@ -1,8 +1,14 @@
 # IMHO no reason to run something like this, because we can simply test the chart against the dev cluster every time. 
 name: Lint and Test Charts
 
-on: pull_request
-
+on: 
+  pull_request:
+    # adding this in order to activate the 'ready_for_review' event, which is not triggered by default
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 jobs:
   lint-test:
     runs-on: ubuntu-latest
@@ -23,24 +29,13 @@ jobs:
           check-latest: true
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.7.0
-
-      - name: Run chart-testing (list-changed)
-        id: list-changed
-        run: |
-          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
-          if [[ -n "$changed" ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
+        uses: helm/chart-testing-action@v2.6.1
 
       - name: Run chart-testing (lint)
-        if: steps.list-changed.outputs.changed == 'true'
         run: ct lint --target-branch ${{ github.event.repository.default_branch }}
 
       - name: Create kind cluster
-        if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@v1.10.0
 
       - name: Run chart-testing (install)
-        if: steps.list-changed.outputs.changed == 'true'
         run: ct install --target-branch ${{ github.event.repository.default_branch }}
