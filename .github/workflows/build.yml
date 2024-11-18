@@ -3,13 +3,7 @@ name: builds
 on:
   push:
     branches: ["main"]
-  pull_request:
-    # adding this in order to activate the 'ready_for_review' event, which is not triggered by default
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
+
   # need this for manual run to make a ':debug' type of distroless container, in case will need to redeploy and debug in shell
   workflow_dispatch:
     inputs:

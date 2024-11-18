@@ -1,8 +1,14 @@
 # IMHO no reason to run something like this, because we can simply test the chart against the dev cluster every time. 
 name: Lint and Test Charts
 
-on: pull_request
-
+on: 
+  pull_request:
+    # adding this in order to activate the 'ready_for_review' event, which is not triggered by default
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 jobs:
   lint-test:
     runs-on: ubuntu-latest
