@@ -12,10 +12,8 @@ COPY file-from-ci .
 # Using distroless base image for least vulnerabilities
 FROM ${runtime_image}:${image_tag} AS runtime
 WORKDIR /app
-COPY --from=builder /app/main.py .
-COPY --from=builder /app/file-from-ci .
-# set the nonroot user ownership on our files if it's that kind of image
-RUN if [ "${image_tag}" == "nonroot" ]; then chown 65532:65532 -R /app ; fi
+COPY --from=builder --chown=65532:65532 /app/main.py .
+COPY --from=builder --chown=65532:65532 /app/file-from-ci .
 
 # the 'non root user' preparation would be needed if we didn't use distroless, as runtime image,
 # and if it was nginx then also need to take care of cache folders it uses. Example:
