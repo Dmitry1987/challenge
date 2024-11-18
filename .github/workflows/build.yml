@@ -60,7 +60,7 @@ jobs:
         uses: docker/build-push-action@v6.9.0
         with:
           context: challenge-1
-          file: ./Dockerfile
+          file: ./challenge-1/Dockerfile
           push: true
           tags: ${{ steps.build-metadata.outputs.tags }}
           labels: ${{ steps.build-metadata.outputs.labels }}
