@@ -1,0 +1,4 @@
+web:
+  replicas: 2
+  dockerImage: xperimnt/webserver
+  dockerImageTag: main
