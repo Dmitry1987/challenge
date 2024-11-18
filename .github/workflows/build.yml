@@ -17,6 +17,7 @@ jobs:
     if: (! github.event.pull_request.draft)
     continue-on-error: false
     steps:
+      - uses: actions/checkout@v4
       - name: build docker image
         run: |
           docker build .
