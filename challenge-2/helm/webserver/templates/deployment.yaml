@@ -29,29 +29,27 @@ spec:
         runAsGroup: 65532
         fsGroup: 65532
       containers:
-          image: {{ .Values.web.dockerImage }}:{{ .Values.web.dockerImageTag }}
-          securityContext:
-            allowPrivilegeEscalation: false
-          name: "{{ .Release.Name }}-web"
-          # we don't have anything except override a port for example, so let's do that
-          command: ["--port", "{{ .Values.web.listeningPort }}"]
-          # this is for readability as I remember, not really used, but I always specify the ports in deployments
-          ports:
-            - containerPort: {{ .Values.web.listeningPort }}
-          livenessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 2
-            httpGet:
-              path: /
-              port: {{ .Values.web.listeningPort }}
-          readinessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 2
-            httpGet:
-              path: /
-              port: {{ .Values.web.listeningPort }}
+      - image: "{{ .Values.web.dockerImage }}:{{ .Values.web.dockerImageTag }}"
+        securityContext:
+          allowPrivilegeEscalation: false
+        name: "{{ .Release.Name }}-web"
+        # this is for readability as I remember, not really used, but I always specify the ports in deployments
+        ports:
+          - containerPort: {{ .Values.web.listeningPort }}
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          httpGet:
+            path: /
+            port: {{ .Values.web.listeningPort }}
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 2
+          httpGet:
+            path: /
+            port: {{ .Values.web.listeningPort }}
       restartPolicy: Always
