@@ -15,7 +15,7 @@ WORKDIR /app
 COPY --from=builder /app/main.py .
 COPY --from=builder /app/file-from-ci .
 # set the nonroot user ownership on our files if it's that kind of image
-RUN [ "${image_tag}" == "nonroot" ] && chown 65532:65532 -R /app
+RUN if [ "${image_tag}" == "nonroot" ]; then chown 65532:65532 -R /app ; fi
 
 # the 'non root user' preparation would be needed if we didn't use distroless, as runtime image,
 # and if it was nginx then also need to take care of cache folders it uses. Example:
