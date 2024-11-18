@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-web"
+  labels:
+    service: "{{ .Release.Name }}-web"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      service: "{{ .Release.Name }}-web"
+  # use Recreate if it's not healthy for your app to run two different versions at the same time during deploy,
+  # otherwise can use RollingUpdate
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: "{{ .Release.Name }}-web"
+        release: "{{ .Release.Name }}"
+    spec:
+      securityContext:
+        # our distroless containers with 'nonroot' have user id of 65532, 
+        # it won't work for 'latest' and 'debug' images but I'm lazy and it's good enough for the challenge =) let's run only the nonroot images in k8s
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+      containers:
+          image: {{ .Values.web.dockerImage }}:{{ .Values.web.dockerImageTag }}
+          securityContext:
+            allowPrivilegeEscalation: false
+          name: "{{ .Release.Name }}-web"
+          # we don't have anything except override a port for example, so let's do that
+          command: ["--port", "{{ .Values.web.listeningPort }}"]
+          # this is for readability as I remember, not really used, but I always specify the ports in deployments
+          ports:
+            - containerPort: {{ .Values.web.listeningPort }}
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            httpGet:
+              path: /
+              port: {{ .Values.web.listeningPort }}
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+            httpGet:
+              path: /
+              port: {{ .Values.web.listeningPort }}
+      restartPolicy: Always
