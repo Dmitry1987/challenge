@@ -10,7 +10,7 @@ COPY main.py .
 COPY file-from-ci .
 
 # Using distroless base image for least vulnerabilities
-FROM ${runtime_image}${image_tag} AS runtime
+FROM ${runtime_image}:${image_tag} AS runtime
 WORKDIR /app
 COPY --from=builder /app/main.py .
 COPY --from=builder /app/file-from-ci .
