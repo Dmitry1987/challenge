@@ -33,7 +33,7 @@ jobs:
         uses: docker/metadata-action@v5.5.1
         with:
           context: workflow
-          images: challenge/webserver
+          images: xperimnt/webserver
           tags: |
             type=ref,event=branch
             type=ref,event=pr
