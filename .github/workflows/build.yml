@@ -80,8 +80,12 @@ jobs:
           # because this can also fail for other docker reasons and exit code will be as if the test suite failed, 
           # but for sake of challenge, the short way :)
 
+          # just to silence the noise of pull during docker run
+          docker pull -q wagoodman/dive:latest 
+
+          # something very not secure which we should never do irl (pulling someone's "latest" image, just mirror it to our ECR or better rebuild from our git repo into our ECR)
           docker run --name ${GITHUB_SHA} --rm \
-          -v $(pwd)/.dive-ci:/config.yaml \
+          -v $(pwd)/challenge-1/.dive-ci:/config.yaml \
           wagoodman/dive:latest --config /config.yaml \
           xperimnt/webserver@${{ steps.push-image.outputs.digest }}
 
