@@ -14,7 +14,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: not github.event.pull_request.draft
+    if: ! github.event.pull_request.draft
     continue-on-error: false
     steps:
       - name: build docker image
