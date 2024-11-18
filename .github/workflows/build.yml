@@ -82,7 +82,8 @@ jobs:
 
           # just to silence the noise of pull during docker run
           docker pull -q wagoodman/dive:latest 
-
+          docker pull -q xperimnt/webserver@${{ steps.push-image.outputs.digest }}
+          
           # something very not secure which we should never do irl (pulling someone's "latest" image, just mirror it to our ECR or better rebuild from our git repo into our ECR)
           sudo docker run --name ${GITHUB_SHA} --rm \
           -e CI=true \
