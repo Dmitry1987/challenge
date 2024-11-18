@@ -18,8 +18,49 @@ jobs:
     continue-on-error: false
     steps:
       - uses: actions/checkout@v4
-      - name: build docker image
-        run: |
-          cd challenge-1
-          docker build -t myservice -q .
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3.3.0
+        with:
+          username: xperimnt
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate docker tags
+        id: build-metadata
+        uses: docker/metadata-action@v5.5.1
+        with:
+          context: workflow
+          images: challenge/webserver
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=long
+          labels: | 
+            org.opencontainers.image.title=${GITHUB_REPOSITORY}
+            org.opencontainers.image.description='A webserver'
+            org.opencontainers.image.version=${GITHUB_SHA}
+            org.opencontainers.image.created={{date 'yyyy-MM-dd'}}
+            maintainer=Dmitry1987
+            github.repository=${GITHUB_REPOSITORY}
+            github.sha=${GITHUB_SHA}
+            github.ref=${GITHUB_REF}
+
+      # verify that path context works correctly and files are not discarded if we use this action instead of cli
+      - name: Write custom data to image
+        run: |
+          echo '{ "version": "${GITHUB_SHA}" }' > challenge-1/file-from-ci
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6.9.0
+        with:
+          context: challenge-1
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.build-metadata.outputs.tags }}
+          labels: ${{ steps.build-metadata.outputs.labels }}

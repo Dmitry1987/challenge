@@ -2,13 +2,16 @@
 FROM python:3.12-slim as builder
 WORKDIR /app
 COPY main.py . 
+# just a file we write during CI run, which doesn't exist in repo, sometimes it's useful
+COPY file-from-ci .
 
 # Using distroless base image for least vulnerabilities
 FROM gcr.io/distroless/python3-debian12 as runtime
 WORKDIR /app
 COPY --from=builder /app/main.py .
+COPY --from=builder /app/file-from-ci .
 
-# the non root stuff preparation would be needed if we didn't use distroless but something like python slim, as runtime image,
+# the 'non root user' preparation would be needed if we didn't use distroless, as runtime image,
 # and if it was nginx then also need to take care of cache folders it uses. Example:
 # RUN useradd --system --create-home --uid 1001 webserver && chown -R webserver:webserver /app
 # USER webserver
