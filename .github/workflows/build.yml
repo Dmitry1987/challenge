@@ -85,6 +85,7 @@ jobs:
 
           # something very not secure which we should never do irl (pulling someone's "latest" image, just mirror it to our ECR or better rebuild from our git repo into our ECR)
           sudo docker run --name ${GITHUB_SHA} --rm \
+          -e CI=true \
           -v /var/run/docker.sock:/var/run/docker.sock \
           -v $(pwd)/challenge-1/.dive-ci:/config.yaml \
           wagoodman/dive:latest --config /config.yaml \
