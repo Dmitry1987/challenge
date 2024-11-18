@@ -2,7 +2,7 @@ name: builds
 
 on:
   push:
-    branches: ["**"]
+    branches: ["main"]
   pull_request:
     # adding this in order to activate the 'ready_for_review' event, which is not triggered by default
     types:
