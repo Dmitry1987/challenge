@@ -1,12 +1,12 @@
 # let's say we build things so using multistage 
-FROM python:3.12-slim as builder
+FROM python:3.12-slim AS builder
 WORKDIR /app
 COPY main.py . 
 # just a file we write during CI run, which doesn't exist in repo, sometimes it's useful
 COPY file-from-ci .
 
 # Using distroless base image for least vulnerabilities
-FROM gcr.io/distroless/python3-debian12 as runtime
+FROM gcr.io/distroless/python3-debian12 AS runtime
 WORKDIR /app
 COPY --from=builder /app/main.py .
 COPY --from=builder /app/file-from-ci .
