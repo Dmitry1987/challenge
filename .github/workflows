@@ -1,0 +1,23 @@
+name: builds
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    # adding this in order to activate the 'ready_for_review' event, which is not triggered by default
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: not github.event.pull_request.draft
+    continue-on-error: false
+    steps:
+      - name: build docker image
+        run: |
+          docker build .
+
