@@ -1,0 +1,25 @@
+name: Test the terraform
+
+on: 
+  push:
+    branches: ["**"]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Run chart-testing (install)
+        run: |
+          # install linter 
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          tflint --chdir=challenge-3 --recursive
