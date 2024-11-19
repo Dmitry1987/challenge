@@ -42,7 +42,6 @@ resource "aws_lb" "main" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
   subnets            = var.subnet_ids
-
   enable_deletion_protection = false
   enable_http2              = true
 

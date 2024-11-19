@@ -38,11 +38,11 @@ variable "security_group_rules" {
   default = [
     {
       type        = "ingress"
-      from_port   = 3306
-      to_port     = 3306
+      from_port   = 443
+      to_port     = 443
       protocol    = "tcp"
-      cidr_blocks = ["10.0.0.0/16"]
-      description = "MySQL access within VPC"
+      cidr_blocks = ["0.0.0.0"]
+      description = "Public access on HTTPS by default, has to be overriden from the main module"
     },
     {
       type        = "egress"
