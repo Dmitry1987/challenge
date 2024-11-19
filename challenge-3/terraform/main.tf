@@ -19,7 +19,7 @@ module "alb" {
   # we're making internal LB for databases 
   subnet_ids = module.vpc.public_subnet_ids
   aws_region  = var.aws_region
-  vpc_cidr    = var.vpc_cidr
+  vpc_id    = module.vpc.vpc_id
   environment = var.environment
   project  = var.project
 
@@ -44,4 +44,40 @@ module "alb" {
       description = "Allow all outbound traffic"
     }
   ]
+}
+
+# RDS will use existing module 
+module "postgres" {
+  source  = "terraform-aws-modules/rds-aurora/aws"
+
+  name           = "${var.project}-aurora-postgres"
+  engine         = "aurora-postgresql"
+  engine_version = "14.5"
+  instance_class = "db.r6g.large"
+  instances = {
+    one = {}
+    2 = {
+      instance_class = "db.r6g.large"
+    }
+  }
+
+  vpc_id    = module.vpc.vpc_id
+  db_subnet_group_name = "${var.project}-db-subnet-group"
+
+  # Allow all the internal subnets which were created earlier
+  security_group_rules = {
+    default_ingress_rules = {
+      cidr_blocks = module.vpc.private_subnet_ids
+    }
+  }
+
+  storage_encrypted   = true
+  apply_immediately   = true
+  monitoring_interval = 10
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project
+    Owner = "DevOps team"
+  }
 }
