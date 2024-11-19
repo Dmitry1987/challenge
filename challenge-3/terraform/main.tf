@@ -49,6 +49,7 @@ module "vpc" {
 # Switching from my own alb module to existing one, because lazy to add listeners and target groups in there, it ended up more than a 2 hour task :D
 module "alb" {
   source = "terraform-aws-modules/alb/aws"
+  version = "~> 9.12.0"
 
   name    = "${var.project}-${var.environment}-alb"
   vpc_id  = module.vpc.vpc_id
@@ -109,7 +110,9 @@ module "alb" {
 }
 
 module "asg" {
+
   source  = "terraform-aws-modules/autoscaling/aws"
+  version = "~> 8.0.0"
 
   # Autoscaling group
   name = "${var.project}-${var.environment}-asg"
@@ -226,6 +229,7 @@ module "asg" {
 # RDS will use existing module 
 module "postgres" {
   source  = "terraform-aws-modules/rds-aurora/aws"
+  version = "~> 9.10.0"
 
   name           = "${var.project}-aurora-postgres"
   engine         = "aurora-postgresql"
