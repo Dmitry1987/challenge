@@ -1,5 +1,4 @@
 
-data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "az" {
   state = "available"
 }
@@ -31,7 +30,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
   tags = {
     Name = "${var.project_name}-vpc"
-    Project = "${var.project_name}"
+    Project = var.project_name
     Owner = "DevOps team"
   }
 }
@@ -46,7 +45,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "${var.project_name}-public-subnet-${count.index + 1}"
-    Project = "${var.project_name}"
+    Project = var.project_name
     Owner = "DevOps team"
     Type = "Public"
   }
@@ -61,7 +60,7 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "${var.project_name}-private-subnet-${count.index + 1}"
-    Project = "${var.project_name}"
+    Project = var.project_name
     Owner = "DevOps team"
     Type = "Private"
   }
@@ -72,7 +71,7 @@ resource "aws_internet_gateway" "main" {
 
   tags = {
     Name = "${var.project_name}-main-igw"
-    Project = "${var.project_name}"
+    Project = var.project_name
     Owner = "DevOps team"
   }
 }
@@ -91,7 +90,7 @@ resource "aws_nat_gateway" "main" {
 
   tags = {
     Name = "${var.project_name}-nat-gateway-${count.index + 1}"
-    Project = "${var.project_name}"
+    Project = var.project_name
     Owner = "DevOps team"
   }
 }
@@ -107,7 +106,7 @@ resource "aws_route_table" "public" {
 
   tags = {
     Name = "${var.project_name}-public-rt"
-    Project = "${var.project_name}"
+    Project = var.project_name
     Owner = "DevOps team"
   }
 }
@@ -124,7 +123,7 @@ resource "aws_route_table" "private" {
 
   tags = {
     Name = "${var.project_name}-private-rt-${count.index + 1}"
-    Project = "${var.project_name}"
+    Project = var.project_name
     Owner = "DevOps team"
   }
 }
