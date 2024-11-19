@@ -11,41 +11,102 @@ module "vpc" {
   project_name  = var.project
 }
 
-# balancer for RDS database
-module "alb" {
-  source = "./modules/alb"
+# module "alb" {
+#   source = "./modules/alb"
   
-  internal = true 
-  # we're making internal LB for databases 
-  subnet_ids = module.vpc.public_subnet_ids
-  aws_region  = var.aws_region
-  vpc_id    = module.vpc.vpc_id
-  environment = var.environment
-  project  = var.project
+#   internal = true 
+#   # we're making internal LB for databases 
+#   subnet_ids = module.vpc.public_subnet_ids
+#   aws_region  = var.aws_region
+#   vpc_id    = module.vpc.vpc_id
+#   environment = var.environment
+#   project  = var.project
 
-  # access to the LB can be a whitelist of Cloudflare IP addresses or something like that,
-  # but such whitelist has to be maintained in a lambda function to keep being updated immediately when 
-  # a published IP list is changing on Cloudflare or any other service that acts as the edge and proxies to the ALB 
-  security_group_rules = [
-    {
-      type        = "ingress"
+#   # access to the LB can be a whitelist of Cloudflare IP addresses or something like that,
+#   # but such whitelist has to be maintained in a lambda function to keep being updated immediately when 
+#   # a published IP list is changing on Cloudflare or any other service that acts as the edge and proxies to the ALB 
+#   security_group_rules = [
+#     {
+#       type        = "ingress"
+#       from_port   = 443
+#       to_port     = 443
+#       protocol    = "tcp"
+#       cidr_blocks = ["0.0.0.0/0"]
+#       description = "Public access on HTTPS port"
+#     },
+#     {
+#       type        = "egress"
+#       from_port   = 0
+#       to_port     = 0
+#       protocol    = "-1"
+#       cidr_blocks = ["0.0.0.0/0"]
+#       description = "Allow all outbound traffic"
+#     }
+#   ]
+# }
+
+
+# Switching from my own alb module to existing one, because lazy to add listeners and target groups in there, it ended up more than a 2 hour task :D
+module "alb" {
+  source = "terraform-aws-modules/alb/aws"
+
+  name    = "${var.project}-${var.environment}-alb"
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.vpc.public_subnet_ids
+
+  # Security Group for default httpd 
+  security_group_ingress_rules = {
+    all_http = {
+      from_port   = 80
+      to_port     = 80
+      ip_protocol = "tcp"
+      description = "HTTP web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+    all_https = {
       from_port   = 443
       to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      description = "Public access on HTTPS port"
-    },
-    {
-      type        = "egress"
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
-      description = "Allow all outbound traffic"
+      ip_protocol = "tcp"
+      description = "HTTPS web traffic"
+      cidr_ipv4   = "0.0.0.0/0"
     }
-  ]
-}
+  }
+  security_group_egress_rules = {
+    all = {
+      ip_protocol = "-1"
+      cidr_ipv4   = "0.0.0.0/0"
+    }
+  }
 
+  # will not be adding the ACM certificate generation and DNS validation in this challenge, but that would be the next step to correctly configure this.
+  listeners = {
+    ex-http-https-redirect = {
+      port     = 80
+      protocol = "HTTP"
+      forward = {
+        target_group_key = "${var.project}-${var.environment}-web"
+      }
+    }
+  }
+
+  target_groups = {
+    "${var.project}-${var.environment}-web" = {
+      name_prefix      = "${var.project}-${var.environment}-web"
+      protocol         = "HTTP"
+      port             = 80
+      target_type        = "instance"
+      vpc_id             = module.vpc.vpc_id
+      autoscaling_group_name = module.asg.autoscaling_group_name 
+    }
+  }
+
+  tags = {
+    ASG = "${var.project}-${var.environment}-asg"
+    Environment = var.environment
+    Project     = var.project
+    Owner = "DevOps team"
+  }
+}
 
 module "asg" {
   source  = "terraform-aws-modules/autoscaling/aws"
