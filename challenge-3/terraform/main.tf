@@ -55,9 +55,9 @@ module "asg" {
 
   min_size                  = 0
   max_size                  = 1
-  # the desired should always be set at null, otherwise it will try to adjust the existing groups every time on apply,
-  # I'm surprised the official example shows a '1'
-  desired_capacity          = null
+  # the desired_capacity in this module can be ignored in subsequent applies so the value we set here will be applied only once
+  desired_capacity          = 1
+  ignore_desired_capacity_changes = true 
   wait_for_capacity_timeout = 0
   health_check_type         = "EC2"
   # which subnets to use 
@@ -77,7 +77,16 @@ module "asg" {
   # also if nodes run at 90-100% routinely for a long time, it's worth to suspend the 'ReplaceUnhealthy' since the internal ec2 health check will always be unhappy about it.
   suspended_processes = ["AZRebalance"]
 
-  # no need to add IAM roles, since in the challenge we're not asked to access the S3 explicitly, :D 
+  # user data to install httpd service and run on start of instance,
+  # better to use from file of course as "base64encode(templatefile(${path.module}/user-data.sh" if it's a longer script 
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    apt update
+    apt install -y httpd
+    systemctl start httpd
+    systemctl enable httpd
+    EOF
+  )
 
   # default disks
   block_device_mappings = [
