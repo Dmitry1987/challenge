@@ -22,4 +22,11 @@ jobs:
         run: |
           # install linter 
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          
+          # lint 
           tflint --chdir=challenge-3 --recursive
+          
+          # install tfsec and run 
+          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+
+          tfsec challenge-3

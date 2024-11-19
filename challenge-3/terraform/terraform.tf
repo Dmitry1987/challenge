@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.9" 
+  required_version = ">= 1.9"
   backend "s3" {
     bucket               = "devopschallenge-tf-state"
     key                  = "infra-demo"
@@ -8,7 +8,7 @@ terraform {
   }
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }

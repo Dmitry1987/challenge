@@ -28,7 +28,7 @@ resource "aws_security_group" "alb" {
     Name        = "${var.project}-${var.environment}-alb-sg"
     Environment = var.environment
     Project     = var.project
-    Owner = "DevOps team"
+    Owner       = "DevOps team"
   }
 
   lifecycle {
@@ -37,18 +37,18 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb" "main" {
-  name               = "${var.project}-${var.environment}-alb"
-  internal           = var.internal
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb.id]
-  subnets            = var.subnet_ids
+  name                       = "${var.project}-${var.environment}-alb"
+  internal                   = var.internal
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb.id]
+  subnets                    = var.subnet_ids
   enable_deletion_protection = false
-  enable_http2              = true
+  enable_http2               = true
 
   tags = {
     Name        = "${var.project}-${var.environment}-alb"
     Environment = var.environment
     Project     = var.project
-    Owner = "DevOps team"
+    Owner       = "DevOps team"
   }
 }

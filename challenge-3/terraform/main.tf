@@ -5,15 +5,15 @@ provider "aws" {
 module "vpc" {
   source = "./modules/vpc"
 
-  aws_region  = var.aws_region
-  vpc_cidr    = var.vpc_cidr
-  environment = var.environment
-  project_name  = var.project
+  aws_region   = var.aws_region
+  vpc_cidr     = var.vpc_cidr
+  environment  = var.environment
+  project_name = var.project
 }
 
 # module "alb" {
 #   source = "./modules/alb"
-  
+
 #   internal = true 
 #   # we're making internal LB for databases 
 #   subnet_ids = module.vpc.public_subnet_ids
@@ -48,7 +48,7 @@ module "vpc" {
 
 # Switching from my own alb module to existing one, because lazy to add listeners and target groups in there, it ended up more than a 2 hour task :D
 module "alb" {
-  source = "terraform-aws-modules/alb/aws"
+  source  = "terraform-aws-modules/alb/aws"
   version = "~> 9.12.0"
 
   name    = "${var.project}-${var.environment}-alb"
@@ -92,20 +92,20 @@ module "alb" {
 
   target_groups = {
     "${var.project}-${var.environment}-web" = {
-      name_prefix      = "${var.project}-${var.environment}-web"
-      protocol         = "HTTP"
-      port             = 80
-      target_type        = "instance"
-      vpc_id             = module.vpc.vpc_id
-      autoscaling_group_name = module.asg.autoscaling_group_name 
+      name_prefix            = "${var.project}-${var.environment}-web"
+      protocol               = "HTTP"
+      port                   = 80
+      target_type            = "instance"
+      vpc_id                 = module.vpc.vpc_id
+      autoscaling_group_name = module.asg.autoscaling_group_name
     }
   }
 
   tags = {
-    ASG = "${var.project}-${var.environment}-asg"
+    ASG         = "${var.project}-${var.environment}-asg"
     Environment = var.environment
     Project     = var.project
-    Owner = "DevOps team"
+    Owner       = "DevOps team"
   }
 }
 
@@ -117,15 +117,15 @@ module "asg" {
   # Autoscaling group
   name = "${var.project}-${var.environment}-asg"
 
-  min_size                  = 0
-  max_size                  = 1
+  min_size = 0
+  max_size = 1
   # the desired_capacity in this module can be ignored in subsequent applies so the value we set here will be applied only once
-  desired_capacity          = 1
-  ignore_desired_capacity_changes = true 
-  wait_for_capacity_timeout = 0
-  health_check_type         = "EC2"
+  desired_capacity                = 1
+  ignore_desired_capacity_changes = true
+  wait_for_capacity_timeout       = 0
+  health_check_type               = "EC2"
   # which subnets to use 
-  vpc_zone_identifier       = module.vpc.private_subnet_ids
+  vpc_zone_identifier = module.vpc.private_subnet_ids
 
   launch_template_name        = "${var.project}-${var.environment}-lt"
   launch_template_description = "Launch template default"
@@ -190,38 +190,38 @@ module "asg" {
   tag_specifications = [
     {
       resource_type = "instance"
-      tags          = {
-        ASG = "${var.project}-${var.environment}-asg"
+      tags = {
+        ASG         = "${var.project}-${var.environment}-asg"
         Environment = var.environment
         Project     = var.project
-        Owner = "DevOps team"
+        Owner       = "DevOps team"
       }
     },
     {
       resource_type = "volume"
-      tags          = {
-        ASG = "${var.project}-${var.environment}-asg"
+      tags = {
+        ASG         = "${var.project}-${var.environment}-asg"
         Environment = var.environment
         Project     = var.project
-        Owner = "DevOps team"
+        Owner       = "DevOps team"
       }
     },
     {
       resource_type = "spot-instances-request"
-      tags          = {
-        ASG = "${var.project}-${var.environment}-asg"
+      tags = {
+        ASG         = "${var.project}-${var.environment}-asg"
         Environment = var.environment
         Project     = var.project
-        Owner = "DevOps team"
+        Owner       = "DevOps team"
       }
     }
   ]
 
   tags = {
-    ASG = "${var.project}-${var.environment}-asg"
+    ASG         = "${var.project}-${var.environment}-asg"
     Environment = var.environment
     Project     = var.project
-    Owner = "DevOps team"
+    Owner       = "DevOps team"
   }
 }
 
@@ -242,7 +242,7 @@ module "postgres" {
     }
   }
 
-  vpc_id    = module.vpc.vpc_id
+  vpc_id               = module.vpc.vpc_id
   db_subnet_group_name = "${var.project}-db-subnet-group"
 
   # Allow all the internal subnets which were created earlier
@@ -259,6 +259,6 @@ module "postgres" {
   tags = {
     Environment = var.environment
     Project     = var.project
-    Owner = "DevOps team"
+    Owner       = "DevOps team"
   }
 }

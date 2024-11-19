@@ -6,17 +6,17 @@ data "aws_availability_zones" "az" {
 
 locals {
   available_az_in_region = length(data.aws_availability_zones.az.names)
-  
+
   # something smart to split the vpc equally to a set of public and private subnets, 
   # the newbits are added to the vpc cidr to get the subnet cidr
   subnet_newbits = ceil(log(local.available_az_in_region * 2, 2))
-  
+
   # for each available AZ we make a subnet of an equal size from the vpc cidr, for example 4 public and 4 private subnets.
   public_subnets = [
     for index in range(local.available_az_in_region) :
     cidrsubnet(var.vpc_cidr, local.subnet_newbits, index)
   ]
-  
+
   private_subnets = [
     for index in range(local.available_az_in_region) :
     cidrsubnet(var.vpc_cidr, local.subnet_newbits, index + local.available_az_in_region)
@@ -29,9 +29,9 @@ resource "aws_vpc" "vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags = {
-    Name = "${var.project_name}-vpc"
+    Name    = "${var.project_name}-vpc"
     Project = var.project_name
-    Owner = "DevOps team"
+    Owner   = "DevOps team"
   }
 }
 
@@ -40,14 +40,14 @@ resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = local.public_subnets[count.index]
   availability_zone = data.aws_availability_zones.az.names[count.index]
-  
+
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public-subnet-${count.index + 1}"
+    Name    = "${var.project_name}-public-subnet-${count.index + 1}"
     Project = var.project_name
-    Owner = "DevOps team"
-    Type = "Public"
+    Owner   = "DevOps team"
+    Type    = "Public"
   }
 }
 
@@ -59,10 +59,10 @@ resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.az.names[count.index]
 
   tags = {
-    Name = "${var.project_name}-private-subnet-${count.index + 1}"
+    Name    = "${var.project_name}-private-subnet-${count.index + 1}"
     Project = var.project_name
-    Owner = "DevOps team"
-    Type = "Private"
+    Owner   = "DevOps team"
+    Type    = "Private"
   }
 }
 
@@ -70,15 +70,15 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "${var.project_name}-main-igw"
+    Name    = "${var.project_name}-main-igw"
     Project = var.project_name
-    Owner = "DevOps team"
+    Owner   = "DevOps team"
   }
 }
 
 # EIPs for NAT gateways in each az 
 resource "aws_eip" "nat" {
-  count = local.available_az_in_region
+  count  = local.available_az_in_region
   domain = "vpc"
 }
 
@@ -89,9 +89,9 @@ resource "aws_nat_gateway" "main" {
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name = "${var.project_name}-nat-gateway-${count.index + 1}"
+    Name    = "${var.project_name}-nat-gateway-${count.index + 1}"
     Project = var.project_name
-    Owner = "DevOps team"
+    Owner   = "DevOps team"
   }
 }
 
@@ -105,9 +105,9 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.project_name}-public-rt"
+    Name    = "${var.project_name}-public-rt"
     Project = var.project_name
-    Owner = "DevOps team"
+    Owner   = "DevOps team"
   }
 }
 
@@ -122,9 +122,9 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "${var.project_name}-private-rt-${count.index + 1}"
+    Name    = "${var.project_name}-private-rt-${count.index + 1}"
     Project = var.project_name
-    Owner = "DevOps team"
+    Owner   = "DevOps team"
   }
 }
 
